@@ -1,10 +1,12 @@
 import pygame
 import sys
 import numpy as np
+import math
 from particle import Particle, fade_trails, update_trail
 
 
-NUM_PARTICLES = 1000
+
+NUM_PARTICLES = 5000
 SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 900 
 
@@ -14,9 +16,12 @@ def main():
     clock = pygame.time.Clock()
     running = True
     rotation_input = 0
-    particles = [Particle(SCREEN_WIDTH, SCREEN_HEIGHT) for _ in range(NUM_PARTICLES)]
     trails = np.zeros((SCREEN_WIDTH, SCREEN_HEIGHT, 3), dtype=np.float32)
-    print(trails)
+    particles = []
+    radius = 200
+    for i in range(NUM_PARTICLES):
+        angle = 2 * math.pi * i / NUM_PARTICLES  # Winkel für jeden Partikel
+        particles.append(Particle(SCREEN_WIDTH, SCREEN_HEIGHT, radius, angle))
 
     while running:
         for event in pygame.event.get():
@@ -28,7 +33,7 @@ def main():
         update_trail(trails, particles)
         for particle in particles:
             particle.update(SCREEN_WIDTH, SCREEN_HEIGHT, rotation_input)
-            pygame.draw.circle(screen, (255,255,255), (int(particle.x), int(particle.y)),200.0)
+            pygame.draw.circle(screen, (255,255,255), (int(particle.x), int(particle.y)),2)
 
         pygame.surfarray.blit_array(screen, trails.astype("uint8"))
         pygame.display.flip()
