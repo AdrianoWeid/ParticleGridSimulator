@@ -6,9 +6,10 @@ from particle import Particle, fade_trails, update_trail
 
 
 
-NUM_PARTICLES = 5000
+NUM_PARTICLES = 200 
 SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 900 
+RANDOM = True
 
 def main(): 
     pygame.init()
@@ -18,10 +19,14 @@ def main():
     rotation_input = 0
     trails = np.zeros((SCREEN_WIDTH, SCREEN_HEIGHT, 3), dtype=np.float32)
     particles = []
-    radius = 200
-    for i in range(NUM_PARTICLES):
-        angle = 2 * math.pi * i / NUM_PARTICLES  # Winkel für jeden Partikel
-        particles.append(Particle(SCREEN_WIDTH, SCREEN_HEIGHT, radius, angle))
+    if not RANDOM:
+        radius = 200
+        for i in range(NUM_PARTICLES):
+            angle = 2 * math.pi * i / NUM_PARTICLES  # Winkel für jeden Partikel
+            particles.append(Particle(SCREEN_WIDTH, SCREEN_HEIGHT, radius, angle))
+    else:
+        particles = [Particle(SCREEN_WIDTH, SCREEN_HEIGHT) for i in range(NUM_PARTICLES)]
+
 
     while running:
         for event in pygame.event.get():
