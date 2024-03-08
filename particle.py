@@ -3,39 +3,39 @@ import numpy as np
 
 
 class Particle():
-    def __init__(self, screen_width, screen_height, radius=None, angle=None, random=False):
-        if random: 
-            center_x = screen_width / 2
-            center_y = screen_height / 2
+    def __init__(self, screen_width, screen_height, speed):
+        self.color = [255,255,255]
+        self.speed = speed
+        self.x = np.random.randint(0, screen_width)
+        self.y = np.random.randint(0, screen_height)
+        self.trail = []
+        self.trail_length = 15
+        self.trail_color = self.color
+        self.fade_amount = 20
+        self.angle = np.random.rand() * 360
 
-            self.x = center_x + radius * math.cos(angle)
-            self.y = center_y + radius * math.sin(angle)
+    def update(self, screen_width, screen_height):
+        radian_angle = math.radians(self.angle)  # Konvertiere Winkel zu Radiant
+        self.x += self.speed * math.cos(radian_angle)
+        self.y += self.speed * math.sin(radian_angle)
 
-            self.angle = angle
-        else:
-            self.x = np.random.randint(0, screen_width)
-            self.y = np.random.randint(0, screen_height)
-            self.angle = np.random.rand() * 360
-    def update(self, screen_width, screen_height, rotation_input):
-        self.x += 2 * math.cos(self.angle)
-        self.y += 2 * math.sin(self.angle)
+        # Update der Trail-Punkte und ihrer Farben
+        self.trail.append(((self.x, self.y), self.color))
+        self.trail = [(pos, fade_color(color, self.fade_amount)) for pos, color in self.trail]
 
-        if self.x < 0 or self.x >= screen_width-1: self.angle = 180 - self.angle
-        if self.y < 0 or self.y >= screen_height-1: self.angle = -self.angle
-        if self.y == 0 and self.x == 0: self.angle = -self.angle
-        self.angle += rotation_input
+        if len(self.trail) > self.trail_length:
+            self.trail.pop(0)
 
-        self.x = min(max(self.x,0), screen_width - 1)
-        self.y = min(max(self.y,0), screen_height - 1)
+        # Wandkollision und Farbänderung
+        if self.x < 0 or self.x >= screen_width - 1: 
+            self.angle = 180 - self.angle
+            self.color = [np.random.randint(0, 255) for _ in range(3)]
+        if self.y < 0 or self.y >= screen_height - 1: 
+            self.angle = -self.angle
+            self.color = [np.random.randint(0, 255) for _ in range(3)]
+        
+        self.x = min(max(self.x, 0), screen_width - 1)
+        self.y = min(max(self.y, 0), screen_height - 1)
 
-def update_trail(trails, particles):
-    for particle in particles:
-        x, y = int(particle.x), int(particle.y)
-        trails[x, y, :] = [255, 255, 255]
-
-def fade_trails(trails, fade_rate=0.95):
-    trails *= fade_rate
-    np.clip(trails, 0, 255, out=trails)
-
-    
-
+def fade_color(color, fade_amount):
+    return tuple(max(0, component - fade_amount) for component in color)

@@ -2,45 +2,42 @@ import pygame
 import sys
 import numpy as np
 import math
-from particle import Particle, fade_trails, update_trail
+from particle import Particle
 
 
 
-NUM_PARTICLES = 200 
+NUM_PARTICLES = 500
 SCREEN_WIDTH = 900
 SCREEN_HEIGHT = 900 
-RANDOM = True
 
 def main(): 
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
-    running = True
-    rotation_input = 0
     trails = np.zeros((SCREEN_WIDTH, SCREEN_HEIGHT, 3), dtype=np.float32)
     particles = []
-    if not RANDOM:
-        radius = 200
-        for i in range(NUM_PARTICLES):
-            angle = 2 * math.pi * i / NUM_PARTICLES  # Winkel für jeden Partikel
-            particles.append(Particle(SCREEN_WIDTH, SCREEN_HEIGHT, radius, angle))
-    else:
-        particles = [Particle(SCREEN_WIDTH, SCREEN_HEIGHT) for i in range(NUM_PARTICLES)]
+
+    for i in range(NUM_PARTICLES):
+        speed = np.random.randint(1, 3)
+        particles.append(Particle(SCREEN_WIDTH, SCREEN_HEIGHT, speed))
 
 
-    while running:
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.exit()
+                pygame.quit()
                 sys.exit()
+        screen.fill((0,0,0))
+        dynamic_radius = min(20,2 * speed)
 
-        fade_trails(trails)
-        update_trail(trails, particles)
         for particle in particles:
-            particle.update(SCREEN_WIDTH, SCREEN_HEIGHT, rotation_input)
-            pygame.draw.circle(screen, (255,255,255), (int(particle.x), int(particle.y)),2)
+            particle.update(SCREEN_WIDTH, SCREEN_HEIGHT)
+            
+            for trail_pos in particle.trail:
+                pygame.draw.circle(screen, trail_pos[1], (int(trail_pos[0][0]), int(trail_pos[0][1])), int(dynamic_radius))
+            
+            pygame.draw.circle(screen, particle.color, (int(particle.x), int(particle.y)), int(dynamic_radius))
 
-        pygame.surfarray.blit_array(screen, trails.astype("uint8"))
         pygame.display.flip()
         clock.tick(60)
 
